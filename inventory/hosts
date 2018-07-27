@@ -1,0 +1,2 @@
+[swarm]
+docker0[1:9].servers ansible_connection=ssh ansible_ssh_user=root

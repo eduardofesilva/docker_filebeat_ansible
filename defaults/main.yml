@@ -1,0 +1,5 @@
+nome_microservico: microservico_batuta
+imagem: microservico_batuta
+hostname: elasticsearch_batuta.vs
+home_filebeat: /etc/filebeat
+home_service: /usr/lib/systemd/system/

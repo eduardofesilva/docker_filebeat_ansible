@@ -1,0 +1,42 @@
+setup.template.settings:
+  index.number_of_shards: 3
+  #index.codec: best_compression
+  #  #_source.enabled: false
+setup.template.name: "{{nome_microservico}}" #ex microservico_batuta
+setup.template.pattern: "{{nome_microservico}}-*" #microservico_batuta-*
+setup.template.overwrite: true
+
+filebeat.autodiscover:
+  # List of enabled autodiscover providers
+  providers:
+    - type: docker
+      templates:
+        - condition:
+            contains.docker.container.image: {{imagem}}  #regex da imagem do microservico
+          config:
+            - type: docker
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              processors:
+                - decode_json_fields:
+                    fields: ["log"]
+                    target: "docker.logs"
+                    max_depth: 2
+                    process_array: true
+                - add_docker_metadata:
+                    host: "unix:///var/run/docker.sock"
+                    match_fields: ["system.process.cgroup.id"]
+                    match_pids: ["process.pid", "process.ppid"]
+                    match_source: true
+                    match_source_index: 4
+                    cleanup_timeout: 60
+              output.console.pretty: true
+              input_type: log
+              json.message_key: log
+              json.keys_under_root: true
+              json.add_error_key: true
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+
+  hosts: ["{{hostname}}:9200"] #HOSTNAME_ELASTICSEARCH = VS_ELASTICSEARCH
+  index: "{{nome_microservico}}-%{+yyyy.MM.dd}" #microservico_batuta-%{+yyyy.MM.dd}

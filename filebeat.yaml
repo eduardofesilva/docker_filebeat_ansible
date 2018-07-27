@@ -1,0 +1,21 @@
+---
+
+- hosts: swarm
+  gather_facts: False
+  remote_user: root
+  vars_files:
+    - defaults/main.yml
+  tasks:
+    - name: Copia arquivo de configuração do filebeat
+      template:
+          src: config/filebeat.j2
+          dest: "{{home_filebeat}}/{{nome_microservico}}.yml"
+    - name: Copia arquivo de configuração do serviço filebeat
+      template:
+          src: config/service_filebeat.j2
+          dest: "{{home_service}}/{{nome_microservico}}.service"
+    - name: Iniciando o servico {{nome_microservico}}
+      systemd:
+          name: "{{nome_microservico}}"
+          state: restarted
+          enabled: yes
